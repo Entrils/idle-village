@@ -1,0 +1,15 @@
+.app {
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+.title {
+  font-size: 26px;
+  margin-bottom: 15px;
+}
+
+.section-title {
+  font-size: 20px;
+  margin-top: 25px;
+  margin-bottom: 10px;
+}

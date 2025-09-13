@@ -1,0 +1,15 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #f4f4f4;
+}
+button {
+  margin: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
