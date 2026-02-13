@@ -1,0 +1,6 @@
+﻿.resetButton {
+  border-color: #8f2d27;
+  color: #fff5f4;
+  background: linear-gradient(180deg, #b44434 0%, #8e2f24 100%);
+  box-shadow: 0 6px 14px rgba(99, 26, 20, 0.35);
+}

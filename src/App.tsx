@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React, { useState } from "react";
 import Resources from "@/entities/resource/ui/Resources";
 import Workers from "@/entities/worker/ui/Worker";
 import VillageUpgrade from "@/features/village/ui/VillageUpgrade";
@@ -15,25 +15,56 @@ const App: React.FC = () => {
   useAutoGather();
   useGoalsChecker();
 
+  const [isNight, setIsNight] = useState(false);
+
   return (
     <div className="app">
-      <h1 className="title">🏕️ Entrils Idle Village</h1>
+      <header className="hero">
+        <div>
+          <p className="eyebrow">Симулятор деревни</p>
+          <h1 className="title">Entrils: Idle Village</h1>
+        </div>
+        <div className="heroActions">
+          <button className="modeButton" onClick={() => setIsNight((prev) => !prev)}>
+            {isNight ? "Переключить на день" : "Переключить на ночь"}
+          </button>
+          <ResetButton />
+        </div>
+      </header>
 
-      <ResetButton />
+      <main className="board">
+        <section className={`section sectionScene ${isNight ? "night" : "day"}`}>
+          <div className="sceneOverlay">
+            <div className="panelSection">
+              <h2 className="section-title">Ресурсы</h2>
+              <Resources />
+            </div>
 
-      <h2 className="section-title">📦 Ресурсы</h2>
-      <Resources />
-      <GatherButtons />
+            <div className="panelSection">
+              <h2 className="section-title">Добыча</h2>
+              <GatherButtons />
+            </div>
+          </div>
+        </section>
 
-      <h2 className="section-title">👷 Рабочие</h2>
-      <Workers />
-      <HireWorkers />
+        <section className="sidebar">
+          <div className="section">
+            <h2 className="section-title">Рабочие</h2>
+            <Workers />
+            <HireWorkers />
+          </div>
 
-      <h2 className="section-title">🏰 Деревня</h2>
-      <VillageUpgrade />
+          <div className="section">
+            <h2 className="section-title">Деревня</h2>
+            <VillageUpgrade />
+          </div>
+        </section>
 
-      <h2 className="section-title">🎯 Цели</h2>
-      <Goals />
+        <section className="section section-goals">
+          <h2 className="section-title">Цели и достижения</h2>
+          <Goals />
+        </section>
+      </main>
 
       <Notifications />
     </div>

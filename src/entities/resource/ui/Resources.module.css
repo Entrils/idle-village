@@ -1,10 +1,36 @@
-.resourceList {
+﻿.resourceList {
   list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
   padding: 0;
-  margin: 0 0 15px 0;
+  margin: 0;
 }
 
 .resourceItem {
-  margin: 4px 0;
-  font-size: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid rgba(255, 243, 224, 0.55);
+  background: rgba(20, 17, 13, 0.56);
+  border-radius: 10px;
+  padding: 8px 10px;
+  color: #fff7ea;
+}
+
+.labelWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.label {
+  font-weight: 700;
+  color: #fff4db;
 }

@@ -1,22 +1,174 @@
-import React from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { addResource } from "@/entities/resource/model/resourceSlice";
 import { addNotification } from "@/entities/notifications/model/notificationSlice";
+import styles from "./GatherButtons.module.css";
+
+const resourceLabel = {
+  wood: "дерево",
+  stone: "камень",
+  food: "еду",
+  gold: "золото",
+} as const;
+
+type ResourceType = "wood" | "stone" | "food" | "gold";
+
+type SpriteConfig = {
+  src: string;
+  columns: number;
+  rows: number;
+  frameDurationMs: number;
+  canvasSize: number;
+  viewportClassName: string;
+  canvasClassName: string;
+};
+
+const SMOKE_CONFIG: SpriteConfig = {
+  src: "/assets/anims/smoke.png",
+  columns: 3,
+  rows: 3,
+  frameDurationMs: 70,
+  canvasSize: 260,
+  viewportClassName: styles.smokeViewport,
+  canvasClassName: styles.smokeCanvas,
+};
+
+const SPARK_CONFIG: SpriteConfig = {
+  src: "/assets/anims/iskra.png",
+  columns: 3,
+  rows: 2,
+  frameDurationMs: 55,
+  canvasSize: 180,
+  viewportClassName: styles.sparkViewport,
+  canvasClassName: styles.sparkCanvas,
+};
+
+const gatherNodes: Array<{ type: ResourceType; title: string; action: string; icon: string }> = [
+  { type: "wood", title: "Лес", action: "Срубить дерево", icon: "/assets/resources/wood.png" },
+  { type: "stone", title: "Скалы", action: "Добыть камень", icon: "/assets/resources/stone.png" },
+  { type: "food", title: "Охота", action: "Собрать еду", icon: "/assets/resources/food.png" },
+  { type: "gold", title: "Жила", action: "Найти золото", icon: "/assets/resources/gold.png" },
+];
+
+const SpriteEffect: React.FC<{ playId: number; config: SpriteConfig }> = ({
+  playId,
+  config,
+}) => {
+  const [frame, setFrame] = useState(0);
+  const [ready, setReady] = useState(false);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const image = new Image();
+    image.src = config.src;
+    image.onload = () => {
+      if (!mounted) return;
+      imageRef.current = image;
+      setReady(true);
+    };
+
+    return () => {
+      mounted = false;
+    };
+  }, [config.src]);
+
+  useEffect(() => {
+    if (playId < 0 || !ready) return;
+
+    const totalFrames = config.columns * config.rows;
+    setFrame(0);
+    const interval = setInterval(() => {
+      setFrame((prev) => {
+        if (prev >= totalFrames - 1) {
+          clearInterval(interval);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, config.frameDurationMs);
+
+    return () => clearInterval(interval);
+  }, [playId, ready, config.columns, config.rows, config.frameDurationMs]);
+
+  useEffect(() => {
+    if (playId < 0 || !ready) return;
+
+    const image = imageRef.current;
+    const canvas = canvasRef.current;
+    if (!image || !canvas) return;
+
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    const frameWidth = Math.floor(image.width / config.columns);
+    const frameHeight = Math.floor(image.height / config.rows);
+    const col = frame % config.columns;
+    const row = Math.floor(frame / config.columns);
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.imageSmoothingEnabled = true;
+    context.drawImage(
+      image,
+      col * frameWidth,
+      row * frameHeight,
+      frameWidth,
+      frameHeight,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+  }, [frame, playId, ready, config.columns, config.rows]);
+
+  if (playId < 0) return null;
+
+  return (
+    <span className={config.viewportClassName} aria-hidden="true">
+      <canvas
+        ref={canvasRef}
+        className={config.canvasClassName}
+        width={config.canvasSize}
+        height={config.canvasSize}
+      />
+    </span>
+  );
+};
 
 const GatherButtons: React.FC = () => {
   const dispatch = useDispatch();
+  const [fxByType, setFxByType] = useState<Record<ResourceType, number>>({
+    wood: -1,
+    stone: -1,
+    food: -1,
+    gold: -1,
+  });
 
-  const handleGather = (type: "wood" | "stone" | "food" | "gold", emoji: string) => {
+  const handleGather = (type: ResourceType) => {
     dispatch(addResource({ type, amount: 1 }));
-    dispatch(addNotification({ message: `${emoji} Вы добыли ${type}`, type: "info" }));
+    dispatch(
+      addNotification({
+        message: `Вы добыли ${resourceLabel[type]}.`,
+        type: "info",
+      })
+    );
+    setFxByType((prev) => ({ ...prev, [type]: prev[type] + 1 }));
   };
 
   return (
-    <div>
-      <button onClick={() => handleGather("wood", "🌲")}>Добыть дерево</button>
-      <button onClick={() => handleGather("stone", "🪨")}>Добыть камень</button>
-      <button onClick={() => handleGather("food", "🍖")}>Добыть еду</button>
-      <button onClick={() => handleGather("gold", "💰")}>Добыть золото</button>
+    <div className={styles.group}>
+      {gatherNodes.map((node) => (
+        <div className={styles.buttonWrap} key={node.type}>
+          <button className={styles.resourceButton} onClick={() => handleGather(node.type)}>
+            <img src={node.icon} alt={node.title} className={styles.nodeIcon} />
+            <span className={styles.nodeTitle}>{node.title}</span>
+            <span className={styles.nodeAction}>{node.action}</span>
+          </button>
+          <SpriteEffect key={`smoke-${node.type}-${fxByType[node.type]}`} playId={fxByType[node.type]} config={SMOKE_CONFIG} />
+          <SpriteEffect key={`spark-${node.type}-${fxByType[node.type]}`} playId={fxByType[node.type]} config={SPARK_CONFIG} />
+        </div>
+      ))}
     </div>
   );
 };

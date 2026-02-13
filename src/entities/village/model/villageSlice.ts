@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+﻿import { createSlice } from "@reduxjs/toolkit";
 
 interface VillageState {
   level: number;
@@ -16,10 +14,7 @@ const villageSlice = createSlice({
   name: "village",
   initialState,
   reducers: {
-    upgradeVillage: (
-      state,
-      action: PayloadAction<{ wood: number; stone: number; gold?: number }>
-    ) => {
+    upgradeVillage: (state) => {
       state.level += 1;
       state.maxWorkers += 2;
     },
@@ -27,5 +22,5 @@ const villageSlice = createSlice({
   },
 });
 
-export const { upgradeVillage, resetVillage  } = villageSlice.actions;
+export const { upgradeVillage, resetVillage } = villageSlice.actions;
 export default villageSlice.reducer;

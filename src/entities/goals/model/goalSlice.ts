@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+﻿import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 export interface Goal {
@@ -28,27 +28,34 @@ function ensureUniqueId(list: Goal[], prefix: string = "goal"): string {
   let id: string;
   do {
     id = generateUniqueId(prefix);
-  } while (list.some((g) => g.id === id));
+  } while (list.some((goal) => goal.id === id));
   return id;
 }
 
+function createInitialGoals(): Goal[] {
+  const list: Goal[] = [];
+
+  list.push({
+    id: ensureUniqueId(list),
+    description: "Накопи 20 дерева",
+    requirement: { resource: { type: "wood", amount: 20 } },
+    reward: { gold: 5 },
+    completed: false,
+  });
+
+  list.push({
+    id: ensureUniqueId(list),
+    description: "Подними деревню до 2 уровня",
+    requirement: { villageLevel: 2 },
+    reward: { gold: 10, food: 10 },
+    completed: false,
+  });
+
+  return list;
+}
+
 const initialState: GoalsState = {
-  list: [
-    {
-      id: generateUniqueId(),
-      description: "Накопи 20 дерева 🌲",
-      requirement: { resource: { type: "wood", amount: 20 } },
-      reward: { gold: 5 },
-      completed: false,
-    },
-    {
-      id: generateUniqueId(),
-      description: "Достигни 2 уровня деревни 🏠",
-      requirement: { villageLevel: 2 },
-      reward: { gold: 10, food: 10 },
-      completed: false,
-    },
-  ],
+  list: createInitialGoals(),
   counter: 3,
 };
 
@@ -57,7 +64,7 @@ const goalsSlice = createSlice({
   initialState,
   reducers: {
     completeGoal: (state, action: PayloadAction<string>) => {
-      const goal = state.list.find((g) => g.id === action.payload);
+      const goal = state.list.find((item) => item.id === action.payload);
       if (goal && !goal.completed) {
         goal.completed = true;
       }
@@ -65,20 +72,16 @@ const goalsSlice = createSlice({
     addGoal: (state, action: PayloadAction<Omit<Goal, "id">>) => {
       const newGoal = { ...action.payload, id: ensureUniqueId(state.list) };
 
-      // не добавляем дубликаты по requirement
       const exists = state.list.some(
-        (g) => JSON.stringify(g.requirement) === JSON.stringify(newGoal.requirement)
+        (goal) => JSON.stringify(goal.requirement) === JSON.stringify(newGoal.requirement)
       );
+
       if (!exists) {
         state.list.push(newGoal);
       }
     },
     resetGoals: (state) => {
-      state.list = initialState.list.map((g) => ({
-        ...g,
-        id: ensureUniqueId(state.list),
-        completed: false,
-      }));
+      state.list = createInitialGoals();
       state.counter = initialState.counter;
     },
   },

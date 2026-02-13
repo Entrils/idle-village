@@ -1,0 +1,137 @@
+﻿.wrapper {
+  display: grid;
+  gap: 10px;
+}
+
+.villageCard {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #d1bf9f;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #f7ecd4 0%, #ebd5ae 100%);
+  padding: 12px;
+}
+
+.badge {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #f8f3e8;
+  background: #5b472f;
+}
+
+.villageSilhouette {
+  width: 100%;
+  height: 72px;
+  border-radius: 10px;
+  border: 1px solid rgba(89, 65, 41, 0.2);
+  background:
+    radial-gradient(circle at 20% 80%, #7f5a37 0 8%, transparent 9%),
+    radial-gradient(circle at 32% 69%, #6b4a2c 0 10%, transparent 11%),
+    radial-gradient(circle at 50% 72%, #8a653d 0 13%, transparent 14%),
+    radial-gradient(circle at 72% 72%, #724f30 0 10%, transparent 11%),
+    linear-gradient(180deg, #caa676 0%, #9e7448 100%);
+  margin-bottom: 10px;
+}
+
+.level,
+.capacity {
+  margin: 0;
+  color: #403528;
+}
+
+.level {
+  font-weight: 800;
+}
+
+.capacity {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.progressBlock {
+  border: 1px solid #d7c6a8;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 9px;
+}
+
+.progressMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #4b3f31;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.progressBar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e4d8c4;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a66f3c 0%, #5f9d4e 100%);
+  transition: width 240ms ease;
+}
+
+.requirements {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.requirementItem {
+  border-radius: 9px;
+  border: 1px solid;
+  padding: 6px 9px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.requirementDone {
+  border-color: #9fca9c;
+  background: rgba(211, 239, 201, 0.55);
+}
+
+.requirementMissing {
+  border-color: #d8b5a9;
+  background: rgba(247, 227, 220, 0.7);
+}
+
+.requirementLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #3f3326;
+  font-weight: 700;
+}
+
+.requirementIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.requirementValue {
+  font-size: 12px;
+  font-weight: 800;
+  color: #44382b;
+}
+
+.upgradeButton {
+  width: 100%;
+}

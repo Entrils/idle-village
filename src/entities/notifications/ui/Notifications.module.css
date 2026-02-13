@@ -1,7 +1,7 @@
-.container {
+﻿.container {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 16px;
+  right: 16px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -10,59 +10,56 @@
 
 .notification {
   color: #fff;
-  padding: 10px 15px 15px 15px;
-  border-radius: 6px;
-  min-width: 220px;
+  padding: 11px 14px 14px;
+  border-radius: 8px;
+  min-width: 240px;
+  max-width: 320px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: box-shadow 0.3s ease-in-out;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.27);
 }
 
 .success {
-  background: green;
-  box-shadow: 0 0 10px 2px rgba(0, 255, 100, 0.8),
-    0 0 20px 6px rgba(0, 255, 150, 0.5);
-  animation: glowPulseGreen 1.5s infinite alternate;
+  background: #2f6d3f;
 }
 
 .error {
-  background: red;
+  background: #a13025;
 }
 
 .info {
-  background: gray;
+  background: #5f6979;
 }
 
 .achievement {
-  background: goldenrod;
-  box-shadow: 0 0 15px 3px rgba(255, 215, 0, 0.9),
-    0 0 30px 10px rgba(255, 223, 70, 0.7);
-  animation: glowPulseGold 1.5s infinite alternate;
+  background: #986f2a;
 }
 
 .close {
   position: absolute;
-  top: 5px;
-  right: 8px;
+  top: 2px;
+  right: 5px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
   cursor: pointer;
-  font-weight: bold;
-  font-size: 14px;
+  font-weight: 700;
+  padding: 2px 6px;
 }
 
 .progressBarWrapper {
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.3);
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
   width: 100%;
   overflow: hidden;
 }
 
 .progressBar {
   height: 100%;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.95);
   width: 100%;
   transform: scaleX(1);
   transform-origin: left;
@@ -70,28 +67,6 @@
 
 .progressBar.animate {
   transition: transform linear;
-  transition-duration: 2000ms;
+  transition-duration: 2200ms;
   transform: scaleX(0);
-}
-
-@keyframes glowPulseGreen {
-  from {
-    box-shadow: 0 0 10px 2px rgba(0, 255, 100, 0.8),
-      0 0 20px 6px rgba(0, 255, 150, 0.5);
-  }
-  to {
-    box-shadow: 0 0 20px 4px rgba(0, 255, 150, 1),
-      0 0 30px 10px rgba(0, 255, 200, 0.7);
-  }
-}
-
-@keyframes glowPulseGold {
-  from {
-    box-shadow: 0 0 15px 3px rgba(255, 215, 0, 0.9),
-      0 0 30px 10px rgba(255, 223, 70, 0.7);
-  }
-  to {
-    box-shadow: 0 0 25px 6px rgba(255, 235, 120, 1),
-      0 0 40px 15px rgba(255, 255, 180, 0.9);
-  }
 }

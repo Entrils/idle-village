@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+﻿import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/app/store";
 import { removeNotification } from "../model/notificationSlice";
 import styles from "./Notifications.module.css";
 
-const NOTIFICATION_LIFETIME = 2000;
+const NOTIFICATION_LIFETIME = 2200;
 
 const NotificationItem: React.FC<{
   id: string;
@@ -16,10 +16,8 @@ const NotificationItem: React.FC<{
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // запускаем анимацию после монтирования
     requestAnimationFrame(() => setAnimate(true));
 
-    // таймер для удаления
     timerRef.current = setTimeout(() => {
       onClose(id);
     }, NOTIFICATION_LIFETIME);
@@ -32,34 +30,29 @@ const NotificationItem: React.FC<{
   return (
     <div className={`${styles.notification} ${styles[type]}`}>
       <span>{message}</span>
-      <span onClick={() => onClose(id)} className={styles.close}>
-        ×
-      </span>
+      <button type="button" onClick={() => onClose(id)} className={styles.close}>
+        x
+      </button>
 
-      {/* прогресс-бар */}
       <div className={styles.progressBarWrapper}>
-        <div
-          className={`${styles.progressBar} ${animate ? styles.animate : ""}`}
-        ></div>
+        <div className={`${styles.progressBar} ${animate ? styles.animate : ""}`}></div>
       </div>
     </div>
   );
 };
 
 const Notifications: React.FC = () => {
-  const notifications = useSelector(
-    (state: RootState) => state.notifications.list
-  );
+  const notifications = useSelector((state: RootState) => state.notifications.list);
   const dispatch = useDispatch();
 
   return (
     <div className={styles.container}>
-      {notifications.map((n) => (
+      {notifications.map((notification) => (
         <NotificationItem
-          key={n.id}
-          id={n.id}
-          message={n.message}
-          type={n.type}
+          key={notification.id}
+          id={notification.id}
+          message={notification.message}
+          type={notification.type}
           onClose={(id) => dispatch(removeNotification(id))}
         />
       ))}

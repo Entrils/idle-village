@@ -1,15 +1,45 @@
-body {
-  margin: 0;
-  font-family: sans-serif;
-  background: #f4f4f4;
-}
-button {
-  margin: 4px;
-  padding: 6px 10px;
-  cursor: pointer;
-}
-button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
+﻿@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap");
+
+* {
+  box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: #24201a;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at 14% 10%, rgba(255, 255, 255, 0.74) 0 16%, transparent 45%),
+    radial-gradient(circle at 87% 92%, rgba(210, 178, 133, 0.34) 0 20%, transparent 44%),
+    linear-gradient(148deg, #f1e8d6 0%, #e2d0ad 48%, #cab188 100%);
+}
+
+button {
+  appearance: none;
+  border: 1px solid #b28f65;
+  background: linear-gradient(180deg, #f6e8cd 0%, #e2c595 100%);
+  color: #2b2419;
+  border-radius: 9px;
+  padding: 8px 12px;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(0.98);
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}

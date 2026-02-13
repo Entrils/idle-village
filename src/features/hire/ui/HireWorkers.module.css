@@ -1,0 +1,94 @@
+﻿.group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.card {
+  border-radius: 12px;
+  border: 1px solid #ccb89a;
+  background: linear-gradient(180deg, #fff7e6 0%, #f1dfbf 100%);
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 46px 1fr auto;
+  grid-template-areas:
+    "avatar meta cost"
+    "avatar action action";
+  gap: 4px 8px;
+  align-items: center;
+}
+
+.cardReady {
+  box-shadow: 0 0 0 1px rgba(90, 130, 64, 0.12), 0 7px 14px rgba(48, 40, 29, 0.12);
+}
+
+.cardDisabled {
+  opacity: 0.74;
+}
+
+.avatar {
+  grid-area: avatar;
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #c3ab88;
+}
+
+.meta {
+  grid-area: meta;
+  min-width: 0;
+}
+
+.name,
+.status {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #2e281f;
+}
+
+.status {
+  font-size: 11px;
+  color: #6f604d;
+}
+
+.costRow {
+  grid-area: cost;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #d0bf9d;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 2px 7px;
+}
+
+.costIcon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.costValue {
+  font-size: 12px;
+  font-weight: 800;
+  color: #3b3328;
+}
+
+.hireButton {
+  grid-area: action;
+  width: 100%;
+  padding: 7px 8px;
+  font-size: 12px;
+}
+
+@media (max-width: 1080px) {
+  .group {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,18 +1,56 @@
-.workersWrapper {
-  margin-bottom: 15px;
+﻿.workersWrapper {
+  margin-bottom: 12px;
 }
 
 .total {
-  font-weight: bold;
-  margin-bottom: 8px;
+  margin: 0 0 10px;
+  color: #4f4639;
+  font-weight: 700;
 }
 
 .workerList {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: grid;
+  gap: 8px;
 }
 
 .workerItem {
-  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #ddcdb3;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.76);
+  padding: 8px;
+}
+
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #ccb79b;
+  background: #f4e5c7;
+}
+
+.meta {
+  display: grid;
+  gap: 3px;
+}
+
+.name,
+.cost {
+  margin: 0;
+  font-size: 13px;
+}
+
+.name {
+  font-weight: 700;
+  color: #2f2a23;
+}
+
+.cost {
+  color: #615546;
 }
