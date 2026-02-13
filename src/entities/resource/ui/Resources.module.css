@@ -7,6 +7,11 @@
   margin: 0;
 }
 
+.resourceListCompact {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
 .resourceItem {
   display: flex;
   justify-content: space-between;
@@ -16,6 +21,12 @@
   border-radius: 10px;
   padding: 8px 10px;
   color: #fff7ea;
+}
+
+.resourceItemCompact {
+  border-radius: 999px;
+  padding: 5px 8px;
+  gap: 6px;
 }
 
 .labelWrap {
@@ -30,7 +41,18 @@
   object-fit: contain;
 }
 
+.resourceItemCompact .icon {
+  width: 16px;
+  height: 16px;
+}
+
 .label {
   font-weight: 700;
   color: #fff4db;
+}
+
+@media (max-width: 640px) {
+  .resourceListCompact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

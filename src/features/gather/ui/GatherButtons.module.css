@@ -1,37 +1,33 @@
-﻿.group {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.buttonWrap {
-  position: relative;
-}
-
-.resourceButton {
-  width: 100%;
-  min-height: 96px;
-  border: 1px solid rgba(255, 245, 226, 0.52);
-  background: linear-gradient(180deg, rgba(31, 26, 22, 0.76) 0%, rgba(18, 15, 12, 0.88) 100%);
-  color: #fff8ec;
-  display: grid;
-  justify-items: start;
-  gap: 2px;
-  padding: 10px 12px;
-  position: relative;
-  overflow: hidden;
-}
-
-.resourceButton::after {
-  content: "";
+﻿.fieldNodes {
   position: absolute;
   inset: 0;
-  background: linear-gradient(118deg, rgba(255, 255, 255, 0.16) 0%, transparent 45%);
+  z-index: 1;
   pointer-events: none;
 }
 
-.resourceButton:hover {
-  filter: brightness(1.05);
+.node {
+  position: absolute;
+  pointer-events: auto;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+}
+
+.nodeButton {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 241, 214, 0.82);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.32), rgba(26, 22, 17, 0.8));
+  padding: 0;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.36);
+  animation: nodePulse 2.4s ease-in-out infinite;
+}
+
+.nodeButton:hover {
+  transform: translateY(-2px) scale(1.04);
 }
 
 .nodeIcon {
@@ -40,15 +36,31 @@
   object-fit: contain;
 }
 
-.nodeTitle {
-  font-size: 15px;
-  font-weight: 800;
+.nodeLabel {
+  color: #fff6e2;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.68);
 }
 
-.nodeAction {
-  color: #d9cab0;
-  font-size: 12px;
-  font-weight: 600;
+.woodNode {
+  left: 14%;
+  top: 43%;
+}
+
+.stoneNode {
+  left: 47%;
+  top: 18%;
+}
+
+.foodNode {
+  left: 86%;
+  top: 47%;
+}
+
+.goldNode {
+  left: 55%;
+  top: 14%;
 }
 
 .smokeViewport,
@@ -64,13 +76,13 @@
 .smokeViewport {
   width: 130px;
   height: 130px;
-  transform: translate(-50%, -55%);
+  transform: translate(-50%, -54%);
   animation: smokeFade 630ms linear forwards;
 }
 
 .sparkViewport {
-  width: 90px;
-  height: 90px;
+  width: 86px;
+  height: 86px;
   transform: translate(-50%, -50%);
   mix-blend-mode: screen;
   animation: sparkFade 360ms ease-out forwards;
@@ -81,6 +93,16 @@
   display: block;
   width: 100%;
   height: 100%;
+}
+
+@keyframes nodePulse {
+  0%,
+  100% {
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.36);
+  }
+  50% {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.48), 0 0 0 2px rgba(255, 238, 194, 0.22);
+  }
 }
 
 @keyframes smokeFade {
@@ -109,18 +131,40 @@
   }
 }
 
-@media (max-width: 700px) {
-  .group {
-    grid-template-columns: 1fr;
+@media (max-width: 860px) {
+  .fieldNodes {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
   }
 
-  .smokeViewport {
-    width: 112px;
-    height: 112px;
+  .node {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    justify-items: start;
   }
 
-  .sparkViewport {
-    width: 78px;
-    height: 78px;
+  .nodeButton {
+    width: 56px;
+    height: 56px;
+    animation: none;
+  }
+
+  .nodeIcon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .woodNode,
+  .stoneNode,
+  .foodNode,
+  .goldNode {
+    left: auto;
+    right: auto;
+    top: auto;
   }
 }

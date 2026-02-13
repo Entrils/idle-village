@@ -10,39 +10,45 @@ const resourceIcons = {
   gold: "/assets/resources/gold.png",
 } as const;
 
-const Resources: React.FC = () => {
+interface ResourcesProps {
+  compact?: boolean;
+}
+
+const Resources: React.FC<ResourcesProps> = ({ compact = false }) => {
   const resources = useSelector((state: RootState) => state.resources);
 
   return (
-    <ul className={styles.resourceList}>
-      <li className={styles.resourceItem}>
+    <ul
+      className={`${styles.resourceList} ${compact ? styles.resourceListCompact : ""}`}
+    >
+      <li className={`${styles.resourceItem} ${compact ? styles.resourceItemCompact : ""}`}>
         <span className={styles.labelWrap}>
           <img src={resourceIcons.wood} alt="Дерево" className={styles.icon} />
-          <span className={styles.label}>Дерево</span>
+          {!compact && <span className={styles.label}>Дерево</span>}
         </span>
         <strong>{resources.wood}</strong>
       </li>
 
-      <li className={styles.resourceItem}>
+      <li className={`${styles.resourceItem} ${compact ? styles.resourceItemCompact : ""}`}>
         <span className={styles.labelWrap}>
           <img src={resourceIcons.stone} alt="Камень" className={styles.icon} />
-          <span className={styles.label}>Камень</span>
+          {!compact && <span className={styles.label}>Камень</span>}
         </span>
         <strong>{resources.stone}</strong>
       </li>
 
-      <li className={styles.resourceItem}>
+      <li className={`${styles.resourceItem} ${compact ? styles.resourceItemCompact : ""}`}>
         <span className={styles.labelWrap}>
           <img src={resourceIcons.food} alt="Еда" className={styles.icon} />
-          <span className={styles.label}>Еда</span>
+          {!compact && <span className={styles.label}>Еда</span>}
         </span>
         <strong>{resources.food}</strong>
       </li>
 
-      <li className={styles.resourceItem}>
+      <li className={`${styles.resourceItem} ${compact ? styles.resourceItemCompact : ""}`}>
         <span className={styles.labelWrap}>
           <img src={resourceIcons.gold} alt="Золото" className={styles.icon} />
-          <span className={styles.label}>Золото</span>
+          {!compact && <span className={styles.label}>Золото</span>}
         </span>
         <strong>{resources.gold}</strong>
       </li>

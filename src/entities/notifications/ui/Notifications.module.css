@@ -61,12 +61,5 @@
   height: 100%;
   background: rgba(255, 255, 255, 0.95);
   width: 100%;
-  transform: scaleX(1);
-  transform-origin: left;
-}
-
-.progressBar.animate {
-  transition: transform linear;
-  transition-duration: 2200ms;
-  transform: scaleX(0);
+  transition: width 50ms linear;
 }
