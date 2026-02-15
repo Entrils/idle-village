@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/app/store";
 import { addResource } from "@/entities/resource/model/resourceSlice";
+import { getGatherAmount } from "@/shared/config/gameBalance";
 
 const workerToResource: Record<"lumberjack" | "miner" | "hunter", "wood" | "stone" | "food"> = {
   lumberjack: "wood",
@@ -9,7 +10,7 @@ const workerToResource: Record<"lumberjack" | "miner" | "hunter", "wood" | "ston
   hunter: "food",
 };
 
-export function useAutoGather() {
+export function useAutoGather(isNight: boolean) {
   const dispatch = useDispatch();
   const workers = useSelector((state: RootState) => state.workers);
 
@@ -18,11 +19,12 @@ export function useAutoGather() {
       (Object.keys(workers) as Array<keyof typeof workers>).forEach((type) => {
         if (workers[type] > 0) {
           const resourceType = workerToResource[type];
-          dispatch(addResource({ type: resourceType, amount: workers[type] }));
+          const gatherPerWorker = getGatherAmount(resourceType, isNight);
+          dispatch(addResource({ type: resourceType, amount: workers[type] * gatherPerWorker }));
         }
       });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [workers, dispatch]);
+  }, [workers, dispatch, isNight]);
 }

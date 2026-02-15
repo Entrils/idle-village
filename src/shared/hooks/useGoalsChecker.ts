@@ -4,6 +4,14 @@ import type { RootState } from "@/app/store";
 import { completeGoal, addGoal, type Goal } from "@/entities/goals/model/goalSlice";
 import { addResource } from "@/entities/resource/model/resourceSlice";
 import { addNotification } from "@/entities/notifications/model/notificationSlice";
+import {
+  formatResourceGoalDescription,
+  getNextResourceGoalAmount,
+  getResourceGoalRewardGold,
+  VILLAGE_GOAL_NEXT_REWARD_GOLD,
+} from "@/shared/config/gameBalance";
+import { getNextStoryGoal } from "@/shared/config/storyGoals";
+import { playSfx } from "@/shared/lib/sfx";
 
 export function useGoalsChecker() {
   const dispatch = useDispatch();
@@ -47,6 +55,7 @@ export function useGoalsChecker() {
       dispatch(addResource({ type: "gold", amount: nextGoal.reward.gold }));
     }
 
+    playSfx("achievement");
     dispatch(
       addNotification({
         message: `Цель выполнена: ${nextGoal.description}`,
@@ -54,13 +63,34 @@ export function useGoalsChecker() {
       })
     );
 
-    if (nextGoal.requirement.resource) {
-      const { type, amount } = nextGoal.requirement.resource;
+    if (nextGoal.kind === "story" && nextGoal.storyKey) {
+      const nextStoryGoal = getNextStoryGoal(nextGoal.storyKey);
+      if (!nextStoryGoal) {
+        return;
+      }
+
       dispatch(
         addGoal({
-          description: `Собери ${amount * 2} ${type}`,
-          requirement: { resource: { type, amount: amount * 2 } },
-          reward: { gold: Math.floor(amount / 10) },
+          description: nextStoryGoal.description,
+          kind: "story",
+          storyKey: nextStoryGoal.key,
+          requirement: nextStoryGoal.requirement,
+          reward: nextStoryGoal.reward,
+          completed: false,
+        })
+      );
+      return;
+    }
+
+    if (nextGoal.requirement.resource) {
+      const { type, amount } = nextGoal.requirement.resource;
+      const nextAmount = getNextResourceGoalAmount(amount);
+      dispatch(
+        addGoal({
+          description: formatResourceGoalDescription(type, nextAmount),
+          kind: "repeatable",
+          requirement: { resource: { type, amount: nextAmount } },
+          reward: { gold: getResourceGoalRewardGold(amount) },
           completed: false,
         })
       );
@@ -71,8 +101,9 @@ export function useGoalsChecker() {
       dispatch(
         addGoal({
           description: `Подними деревню до ${nextGoal.requirement.villageLevel + 1} уровня`,
+          kind: "repeatable",
           requirement: { villageLevel: nextGoal.requirement.villageLevel + 1 },
-          reward: { gold: 50 },
+          reward: { gold: VILLAGE_GOAL_NEXT_REWARD_GOLD },
           completed: false,
         })
       );

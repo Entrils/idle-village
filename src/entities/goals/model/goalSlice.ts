@@ -1,9 +1,17 @@
 ﻿import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import {
+  INITIAL_VILLAGE_GOAL_LEVEL,
+  INITIAL_WOOD_GOAL,
+  INITIAL_WOOD_GOAL_REWARD_GOLD,
+} from "@/shared/config/gameBalance";
+import { getFirstStoryGoal } from "@/shared/config/storyGoals";
 
 export interface Goal {
   id: string;
   description: string;
+  kind?: "repeatable" | "story";
+  storyKey?: string;
   requirement: {
     resource?: { type: "wood" | "stone" | "food" | "gold"; amount: number };
     villageLevel?: number;
@@ -37,17 +45,30 @@ function createInitialGoals(): Goal[] {
 
   list.push({
     id: ensureUniqueId(list),
-    description: "Накопи 20 дерева",
-    requirement: { resource: { type: "wood", amount: 20 } },
-    reward: { gold: 5 },
+    description: `Накопи ${INITIAL_WOOD_GOAL} дерева`,
+    kind: "repeatable",
+    requirement: { resource: { type: "wood", amount: INITIAL_WOOD_GOAL } },
+    reward: { gold: INITIAL_WOOD_GOAL_REWARD_GOLD },
     completed: false,
   });
 
   list.push({
     id: ensureUniqueId(list),
-    description: "Подними деревню до 2 уровня",
-    requirement: { villageLevel: 2 },
+    description: `Подними деревню до ${INITIAL_VILLAGE_GOAL_LEVEL} уровня`,
+    kind: "repeatable",
+    requirement: { villageLevel: INITIAL_VILLAGE_GOAL_LEVEL },
     reward: { gold: 10, food: 10 },
+    completed: false,
+  });
+
+  const firstStoryGoal = getFirstStoryGoal();
+  list.push({
+    id: ensureUniqueId(list),
+    description: firstStoryGoal.description,
+    kind: "story",
+    storyKey: firstStoryGoal.key,
+    requirement: firstStoryGoal.requirement,
+    reward: firstStoryGoal.reward,
     completed: false,
   });
 
@@ -73,7 +94,11 @@ const goalsSlice = createSlice({
       const newGoal = { ...action.payload, id: ensureUniqueId(state.list) };
 
       const exists = state.list.some(
-        (goal) => JSON.stringify(goal.requirement) === JSON.stringify(newGoal.requirement)
+        (goal) =>
+          (newGoal.storyKey && goal.storyKey === newGoal.storyKey) ||
+          (!newGoal.storyKey &&
+            !goal.storyKey &&
+            JSON.stringify(goal.requirement) === JSON.stringify(newGoal.requirement))
       );
 
       if (!exists) {

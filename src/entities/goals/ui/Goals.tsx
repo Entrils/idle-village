@@ -54,12 +54,18 @@ const Goals: React.FC = () => {
     }
 
     const rewards = Object.entries(goal.reward).filter(([, value]) => Boolean(value));
+    const isStoryGoal = goal.kind === "story";
 
     return (
       <li key={goal.id} className={`${styles.goalItem} ${goal.completed ? styles.goalDone : ""}`}>
         <div className={styles.goalHead}>
           <p className={styles.goalText}>{goal.description}</p>
-          <span className={styles.stateBadge}>{goal.completed ? "Готово" : "В процессе"}</span>
+          <div className={styles.badgeRow}>
+            <span className={`${styles.typeBadge} ${isStoryGoal ? styles.storyBadge : styles.repeatableBadge}`}>
+              {isStoryGoal ? "Сюжет" : "Обычная"}
+            </span>
+            <span className={styles.stateBadge}>{goal.completed ? "Готово" : "В процессе"}</span>
+          </div>
         </div>
 
         <p className={styles.progressText}>{progressText}</p>

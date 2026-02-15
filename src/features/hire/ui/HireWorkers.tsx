@@ -4,9 +4,9 @@ import type { RootState } from "@/app/store";
 import { hireWorker, type WorkerType } from "@/entities/worker/model/workerSlice";
 import { addResource } from "@/entities/resource/model/resourceSlice";
 import { addNotification } from "@/entities/notifications/model/notificationSlice";
+import { getHireCost } from "@/shared/config/gameBalance";
+import { playSfx } from "@/shared/lib/sfx";
 import styles from "./HireWorkers.module.css";
-
-const getHireCost = (count: number) => 10 + count * 2;
 
 const workerInfo: Record<
   WorkerType,
@@ -41,6 +41,7 @@ const HireWorkers: React.FC = () => {
 
   const handleHire = (type: WorkerType) => {
     if (isLimitReached) {
+      playSfx("error");
       dispatch(
         addNotification({
           message: "Лимит работников достигнут.",
@@ -52,6 +53,7 @@ const HireWorkers: React.FC = () => {
 
     const cost = getHireCost(workers[type]);
     if (resources.food < cost) {
+      playSfx("error");
       dispatch(
         addNotification({
           message: "Не хватает еды для найма.",
@@ -70,6 +72,7 @@ const HireWorkers: React.FC = () => {
       hunter: "Нанят охотник.",
     } as const;
 
+    playSfx("hire");
     dispatch(
       addNotification({
         message: messageByType[type],

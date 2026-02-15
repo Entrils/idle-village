@@ -1,9 +1,8 @@
-﻿import React from "react";
+﻿import type { FC } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/app/store";
+import { getHireCost } from "@/shared/config/gameBalance";
 import styles from "./Workers.module.css";
-
-const getHireCost = (count: number) => 10 + count * 2;
 
 const portraits = {
   lumberjack: "/assets/portraits/lesorub.png",
@@ -11,7 +10,7 @@ const portraits = {
   hunter: "/assets/portraits/hunter.png",
 } as const;
 
-const Workers: React.FC = () => {
+const Workers: FC = () => {
   const workers = useSelector((state: RootState) => state.workers);
   const village = useSelector((state: RootState) => state.village);
 

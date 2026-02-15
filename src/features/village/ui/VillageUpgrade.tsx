@@ -3,13 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/app/store";
 import { upgradeVillage } from "@/entities/village/model/villageSlice";
 import { addNotification } from "@/entities/notifications/model/notificationSlice";
+import { getVillageUpgradeCost } from "@/shared/config/gameBalance";
+import { playSfx } from "@/shared/lib/sfx";
 import styles from "./VillageUpgrade.module.css";
-
-const getUpgradeCost = (level: number) => ({
-  wood: 100 * level,
-  stone: 100 * level,
-  gold: level > 1 ? 50 * (level - 1) : 0,
-});
 
 const resourceIcons = {
   wood: "/assets/resources/wood.png",
@@ -22,7 +18,7 @@ const VillageUpgrade: React.FC = () => {
   const resources = useSelector((state: RootState) => state.resources);
   const village = useSelector((state: RootState) => state.village);
 
-  const cost = getUpgradeCost(village.level);
+  const cost = getVillageUpgradeCost(village.level);
 
   const hasWood = resources.wood >= cost.wood;
   const hasStone = resources.stone >= cost.stone;
@@ -69,6 +65,7 @@ const VillageUpgrade: React.FC = () => {
 
   const handleUpgrade = () => {
     if (!canUpgrade) {
+      playSfx("error");
       dispatch(
         addNotification({
           message: "Недостаточно ресурсов для улучшения.",
@@ -79,6 +76,7 @@ const VillageUpgrade: React.FC = () => {
     }
 
     dispatch(upgradeVillage());
+    playSfx("upgrade");
     dispatch(
       addNotification({
         message: `Деревня улучшена до уровня ${village.level + 1}.`,

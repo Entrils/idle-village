@@ -1,81 +1,185 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import Resources from "@/entities/resource/ui/Resources";
-import Workers from "@/entities/worker/ui/Worker";
-import VillageUpgrade from "@/features/village/ui/VillageUpgrade";
-import Goals from "@/entities/goals/ui/Goals";
 import GatherButtons from "@/features/gather/ui/GatherButtons";
-import HireWorkers from "@/features/hire/ui/HireWorkers";
-import ResetButton from "@/features/reset/ui/ResetButton";
+import BottomMenu from "@/features/menu/ui/BottomMenu";
 import Notifications from "@/entities/notifications/ui/Notifications";
+import { addNotification } from "@/entities/notifications/model/notificationSlice";
+import { DAY_FOOD_BONUS, NIGHT_GOLD_BONUS } from "@/shared/config/gameBalance";
+import {
+  getEffectsVolume,
+  getMasterVolume,
+  getSfxEnabled,
+  setEffectsVolume,
+  setMasterVolume,
+  setSfxEnabled,
+} from "@/shared/lib/sfx";
 import { useAutoGather } from "@/shared/hooks/useAutoGather";
 import { useGoalsChecker } from "@/shared/hooks/useGoalsChecker";
 import "./App.css";
 
-type ModalName = "workers" | "village" | "goals" | null;
+const DAY_NIGHT_PHASE_MS = 15 * 60 * 1000;
+const FULL_DAY_MS = DAY_NIGHT_PHASE_MS * 2;
+const MINUTES_IN_DAY = 24 * 60;
+const GAME_DAY_START_MINUTES = 8 * 60;
+const GAME_TIME_STORAGE_KEY = "idle-village:game-time";
 
-const MODAL_ANIMATION_MS = 240;
+type PersistedGameTime = {
+  phaseStartedAt: number;
+  gameStartedAt: number;
+  isNight: boolean;
+};
 
-const menuItems: Array<{
-  id: Exclude<ModalName, null>;
-  title: string;
-  subtitle: string;
-  icon: string;
-}> = [
-  {
-    id: "workers",
-    title: "Рабочие",
-    subtitle: "Найм и роли",
-    icon: "/assets/icons/hire.png",
-  },
-  {
-    id: "village",
-    title: "Деревня",
-    subtitle: "Улучшения",
-    icon: "/assets/icons/townhall.png",
-  },
-  {
-    id: "goals",
-    title: "Цели",
-    subtitle: "Квесты и награды",
-    icon: "/assets/icons/quests.png",
-  },
-];
+function loadPersistedGameTime(): PersistedGameTime | null {
+  try {
+    const raw = localStorage.getItem(GAME_TIME_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<PersistedGameTime>;
+    if (
+      typeof parsed.phaseStartedAt !== "number" ||
+      typeof parsed.gameStartedAt !== "number" ||
+      typeof parsed.isNight !== "boolean"
+    ) {
+      return null;
+    }
+    return {
+      phaseStartedAt: parsed.phaseStartedAt,
+      gameStartedAt: parsed.gameStartedAt,
+      isNight: parsed.isNight,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function savePersistedGameTime(state: PersistedGameTime): void {
+  try {
+    localStorage.setItem(GAME_TIME_STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Ignore storage write errors (private mode / quota)
+  }
+}
+
+function formatCountdown(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = Math.floor(totalSeconds % 60)
+    .toString()
+    .padStart(2, "0");
+  return `${minutes}:${seconds}`;
+}
+
+function formatGameTime(totalMinutes: number): string {
+  const minutesInDay = ((totalMinutes % MINUTES_IN_DAY) + MINUTES_IN_DAY) % MINUTES_IN_DAY;
+  const hours = Math.floor(minutesInDay / 60)
+    .toString()
+    .padStart(2, "0");
+  const minutes = (minutesInDay % 60).toString().padStart(2, "0");
+  return `${hours}:${minutes}`;
+}
+
+function calculateGameMinutes(elapsedMs: number): number {
+  const dayProgressMinutes = Math.floor((elapsedMs / FULL_DAY_MS) * MINUTES_IN_DAY);
+  return (GAME_DAY_START_MINUTES + dayProgressMinutes) % MINUTES_IN_DAY;
+}
 
 const App: React.FC = () => {
-  useAutoGather();
+  const dispatch = useDispatch();
+  const persistedTime = useMemo(() => loadPersistedGameTime(), []);
+  const now = Date.now();
+  const initialPhaseStartedAt = persistedTime?.phaseStartedAt ?? now;
+  const initialGameStartedAt = persistedTime?.gameStartedAt ?? now;
+  const [isNight, setIsNight] = useState(persistedTime?.isNight ?? false);
+  const isNightRef = useRef<boolean>(persistedTime?.isNight ?? false);
+  const phaseStartedAtRef = useRef<number>(initialPhaseStartedAt);
+  const gameStartedAtRef = useRef<number>(initialGameStartedAt);
+  const [secondsUntilSwitch, setSecondsUntilSwitch] = useState(() => {
+    const elapsedInCurrentPhase = now - initialPhaseStartedAt;
+    const remainMs = Math.max(0, DAY_NIGHT_PHASE_MS - elapsedInCurrentPhase);
+    return Math.ceil(remainMs / 1000);
+  });
+  const [gameTimeMinutes, setGameTimeMinutes] = useState(() =>
+    calculateGameMinutes(now - initialGameStartedAt)
+  );
+
+  const [isSfxOn, setIsSfxOn] = useState(() => getSfxEnabled());
+  const [masterVolume, setMasterVolumeState] = useState(() => Math.round(getMasterVolume() * 100));
+  const [effectsVolume, setEffectsVolumeState] = useState(() => Math.round(getEffectsVolume() * 100));
+
+  useAutoGather(isNight);
   useGoalsChecker();
 
-  const [isNight, setIsNight] = useState(false);
-  const [activeModal, setActiveModal] = useState<ModalName>(null);
-  const [isModalClosing, setIsModalClosing] = useState(false);
+  useEffect(() => {
+    isNightRef.current = isNight;
+  }, [isNight]);
 
   useEffect(() => {
-    if (!isModalClosing) return;
+    savePersistedGameTime({
+      phaseStartedAt: phaseStartedAtRef.current,
+      gameStartedAt: gameStartedAtRef.current,
+      isNight: isNightRef.current,
+    });
+  }, []);
 
-    const timer = setTimeout(() => {
-      setActiveModal(null);
-      setIsModalClosing(false);
-    }, MODAL_ANIMATION_MS);
+  useEffect(() => {
+    const updateTime = () => {
+      const now = Date.now();
+      const elapsedSinceGameStart = now - gameStartedAtRef.current;
+      const elapsed = now - phaseStartedAtRef.current;
+      const transitionsCount = Math.floor(elapsed / DAY_NIGHT_PHASE_MS);
 
-    return () => clearTimeout(timer);
-  }, [isModalClosing]);
+      if (transitionsCount > 0) {
+        phaseStartedAtRef.current += transitionsCount * DAY_NIGHT_PHASE_MS;
 
-  const openModal = (name: Exclude<ModalName, null>) => {
-    setActiveModal(name);
-    setIsModalClosing(false);
-  };
+        if (transitionsCount % 2 === 1) {
+          const nextIsNight = !isNightRef.current;
+          isNightRef.current = nextIsNight;
+          setIsNight(nextIsNight);
+          dispatch(
+            addNotification({
+              message: nextIsNight
+                ? `Наступила ночь. Золото приносит +${NIGHT_GOLD_BONUS}.`
+                : `Наступило утро. Еда приносит +${DAY_FOOD_BONUS}.`,
+              type: "info",
+            })
+          );
+        }
 
-  const closeModal = () => {
-    if (!activeModal || isModalClosing) return;
-    setIsModalClosing(true);
-  };
+        savePersistedGameTime({
+          phaseStartedAt: phaseStartedAtRef.current,
+          gameStartedAt: gameStartedAtRef.current,
+          isNight: isNightRef.current,
+        });
+      }
 
-  const modalTitle = useMemo(() => {
-    if (activeModal === "workers") return "Рабочие";
-    if (activeModal === "village") return "Деревня";
-    if (activeModal === "goals") return "Цели";
-    return "";
-  }, [activeModal]);
+      const elapsedInCurrentPhase = now - phaseStartedAtRef.current;
+      const remainMs = Math.max(0, DAY_NIGHT_PHASE_MS - elapsedInCurrentPhase);
+      setSecondsUntilSwitch(Math.ceil(remainMs / 1000));
+
+      const nextGameTimeMinutes = calculateGameMinutes(elapsedSinceGameStart);
+      setGameTimeMinutes(nextGameTimeMinutes);
+    };
+
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, [dispatch]);
+
+  useEffect(() => {
+    setSfxEnabled(isSfxOn);
+  }, [isSfxOn]);
+
+  useEffect(() => {
+    setMasterVolume(masterVolume / 100);
+  }, [masterVolume]);
+
+  useEffect(() => {
+    setEffectsVolume(effectsVolume / 100);
+  }, [effectsVolume]);
+
+  const countdown = useMemo(() => formatCountdown(secondsUntilSwitch), [secondsUntilSwitch]);
+  const gameTime = useMemo(() => formatGameTime(gameTimeMinutes), [gameTimeMinutes]);
 
   return (
     <div className={`app ${isNight ? "night" : "day"}`}>
@@ -84,75 +188,29 @@ const App: React.FC = () => {
           <p className="eyebrow">Симулятор деревни</p>
           <h1 className="title">Entrils: Idle Village</h1>
         </div>
-        <button className="modeButton" onClick={() => setIsNight((prev) => !prev)}>
-          {isNight ? "Дневной режим" : "Ночной режим"}
-        </button>
+
+        <div className="topControls">
+          <div className={`timeBadge ${isNight ? "night" : "day"}`}>
+            <span className="gameClock">Время: {gameTime}</span>
+            <span className="timePhase">{isNight ? "Ночь" : "День"}</span>
+            <span className="timeCountdown">До смены: {countdown}</span>
+          </div>
+        </div>
       </header>
 
       <aside className="resourcesPanel">
         <Resources compact />
       </aside>
 
-      <GatherButtons />
-
-      <section className="bottomMenu">
-        <div className="dockMeta">
-          <p className="dockTitle">Меню деревни</p>
-          <p className="dockHint">Открой раздел для управления прогрессом</p>
-        </div>
-
-        <div className="dockActions">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              className={`menuCard ${activeModal === item.id && !isModalClosing ? "active" : ""}`}
-              onClick={() => openModal(item.id)}
-            >
-              <img src={item.icon} alt="" className="menuIcon" />
-              <span className="menuText">
-                <span className="menuTitle">{item.title}</span>
-                <span className="menuSubtitle">{item.subtitle}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {activeModal && (
-        <div
-          className={`modalOverlay ${isModalClosing ? "closing" : ""}`}
-          onClick={closeModal}
-        >
-          <section className="modalCard" onClick={(event) => event.stopPropagation()}>
-            <header className="modalHeader">
-              <h2 className="modalTitle">{modalTitle}</h2>
-              <button className="closeButton" onClick={closeModal}>
-                Закрыть
-              </button>
-            </header>
-
-            <div className="modalBody">
-              {activeModal === "workers" && (
-                <>
-                  <Workers />
-                  <HireWorkers />
-                </>
-              )}
-
-              {activeModal === "village" && (
-                <>
-                  <VillageUpgrade />
-                  <div className="resetWrap">
-                    <ResetButton />
-                  </div>
-                </>
-              )}
-
-              {activeModal === "goals" && <Goals />}
-            </div>
-          </section>
-        </div>
-      )}
+      <GatherButtons isNight={isNight} />
+      <BottomMenu
+        isSfxOn={isSfxOn}
+        masterVolume={masterVolume}
+        effectsVolume={effectsVolume}
+        onToggleSfx={() => setIsSfxOn((prev) => !prev)}
+        onMasterVolumeChange={setMasterVolumeState}
+        onEffectsVolumeChange={setEffectsVolumeState}
+      />
 
       <Notifications />
     </div>

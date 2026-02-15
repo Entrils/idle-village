@@ -1,6 +1,8 @@
 ﻿import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { addResource } from "@/entities/resource/model/resourceSlice";
+import { getGatherAmount } from "@/shared/config/gameBalance";
+import { playSfx } from "@/shared/lib/sfx";
 import styles from "./GatherButtons.module.css";
 
 type ResourceType = "wood" | "stone" | "food" | "gold";
@@ -34,6 +36,7 @@ const SPARK_CONFIG: SpriteConfig = {
   viewportClassName: styles.sparkViewport,
   canvasClassName: styles.sparkCanvas,
 };
+const GATHER_COOLDOWN_MS = 100;
 
 const gatherNodes: Array<{
   type: ResourceType;
@@ -153,8 +156,14 @@ const SpriteEffect: React.FC<{ playId: number; config: SpriteConfig }> = ({
   );
 };
 
-const GatherButtons: React.FC = () => {
+const GatherButtons: React.FC<{ isNight: boolean }> = ({ isNight }) => {
   const dispatch = useDispatch();
+  const lastGatherAtRef = useRef<Record<ResourceType, number>>({
+    wood: 0,
+    stone: 0,
+    food: 0,
+    gold: 0,
+  });
   const [fxByType, setFxByType] = useState<Record<ResourceType, number>>({
     wood: -1,
     stone: -1,
@@ -163,7 +172,15 @@ const GatherButtons: React.FC = () => {
   });
 
   const handleGather = (type: ResourceType) => {
-    dispatch(addResource({ type, amount: 1 }));
+    const now = Date.now();
+    if (now - lastGatherAtRef.current[type] < GATHER_COOLDOWN_MS) {
+      return;
+    }
+    lastGatherAtRef.current[type] = now;
+
+    const amount = getGatherAmount(type, isNight);
+    dispatch(addResource({ type, amount }));
+    playSfx("gather");
     setFxByType((prev) => ({ ...prev, [type]: prev[type] + 1 }));
   };
 

@@ -1,4 +1,5 @@
 ﻿import { createSlice } from "@reduxjs/toolkit";
+import { getVillageMaxWorkers } from "@/shared/config/gameBalance";
 
 interface VillageState {
   level: number;
@@ -7,7 +8,7 @@ interface VillageState {
 
 const initialState: VillageState = {
   level: 1,
-  maxWorkers: 3,
+  maxWorkers: getVillageMaxWorkers(1),
 };
 
 const villageSlice = createSlice({
@@ -16,7 +17,7 @@ const villageSlice = createSlice({
   reducers: {
     upgradeVillage: (state) => {
       state.level += 1;
-      state.maxWorkers += 2;
+      state.maxWorkers = getVillageMaxWorkers(state.level);
     },
     resetVillage: () => initialState,
   },
